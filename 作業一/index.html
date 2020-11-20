@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - Todo Demo Template</title>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.css'><link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div id="app" class="container my-3">
+  <div class="input-group mb-3">
+    <div class="input-group-prepend">
+      <span class="input-group-text" id="basic-addon1">待辦事項</span>
+    </div>
+    <input type="text" class="form-control" placeholder="準備要做的任務" v-model="todoTitle" @keyup.enter="AddItem">
+    <div class="input-group-append">
+      <button class="btn btn-primary" type="button" @click="AddItem" >新增</button>
+    </div>
+  </div>
+  <div class="card text-center">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link" href="#" :class="{'active':activeTab == 'all'}" @click="activeTab='all'">全部</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" :class="{'active':activeTab == 'active'}" @click="activeTab='active'">進行中</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" :class="{'active':activeTab == 'finish'}" @click="activeTab='finish'">已完成</a>
+        </li>
+      </ul>
+    </div>
+    <ul class="list-group list-group-flush text-left" v-for="(item, key) in FilterTodoList">
+      <li class="list-group-item" v-if="clcikItemModel != item" @dblclick="SetEditorItem(item)" >
+        <div class="d-flex">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" :id="item.id" v-model="item.complete">
+            <label class="form-check-label" :for="item.id" v-bind:class="{completed:item.complete}">{{item.title}}</label>
+          </div>
+          <button type="button" class="close ml-auto" aria-label="Close" @click="ClearItemById(item.id)">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </li>
+      <li class="list-group-item" v-if="clcikItemModel == item">
+        <input type="text" class="form-control" v-model="clcikItemModel.title" @keyup.enter="EditItemTitle" @keyup.esc="ClearItemModel">
+      </li>
+    </ul>
+    <div class="card-footer d-flex justify-content-between">
+      <span>還有 {{GetUnfinfishItem.length}} 筆任務未完成</span>
+      <a href="#" @click.prevent="ClearAllItems" >清除所有任務</a>
+    </div>
+  </div>
+</div>
+<!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.js'></script>
+  <script >
+    var app = new Vue({
+      el:'#app',
+      data:{
+        todoTitle:'',
+        todoList:[],
+        activeTab:'all',
+        clcikItemModel:{}
+      },
+      methods: {
+        AddItem:function(){
+          if(this.todoTitle.trim()!= '')
+          {
+            this.todoList.push({
+              id:Math.floor(Date.now()),
+              title:this.todoTitle.trim(),
+              complete:false
+            });
+            this.todoTitle = '';
+          }
+        },
+        ClearAllItems:function()
+        {
+          if(this.todoList.length>0)
+          {
+            if(confirm('確認將所有任務清空'))
+            {
+              this.todoList = [];
+              alert(所有紀錄被清空);
+            }      
+          }          
+        },
+        ClearItemById:function(key){
+          var ListIndexById = this.todoList.findIndex(o=>o.id == key);
+          this.todoList.splice(ListIndexById,1);
+        },
+        SetEditorItem:function(item)
+        {
+          this.clcikItemModel = item;
+        },
+        EditItemTitle:function()
+        {
+           this.todoList.find(o=>o.id == this.clcikItemModel.id).title == this.clcikItemModel.title;
+           this.ClearItemModel();
+        },
+        ClearItemModel:function()
+        {
+          this.clcikItemModel = {};
+        }
+      },
+      computed: {
+        GetUnfinfishItem:function()
+        {
+          return this.todoList.filter(o=> !o.complete);
+        },
+        FilterTodoList:function()
+        {
+          if (this.activeTab == 'all') {
+            return this.todoList;
+          }else if(this.activeTab == 'active'){
+            return this.todoList.filter(x => !x.complete);
+          }else if(this.activeTab == 'finish'){
+            return this.todoList.filter(x => x.complete);
+          }else{
+            return [];
+          }
+        }
+      },
+    });
+  </script>
+</body>
+</html>
